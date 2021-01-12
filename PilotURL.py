@@ -4,13 +4,13 @@ the links/downloading files that Pilot.py requests. PilotURL.py can only recieve
 information from Pilot.py and cannot access any attributes/methods of Pilot.py
 unless it is passed through
 
-- Rod
+- Rod (01/11/2021)
 """
 
 import requests
 from bs4 import BeautifulSoup
 
-class MainURL(object): # There's a chance the class inheritance may need to be changed
+class MainURL(object):
     """
     This class is meant to be used as a base for current and future subclasses.
     Since PilotsProgram will require many files/resources from the internet,
@@ -22,11 +22,12 @@ class MainURL(object): # There's a chance the class inheritance may need to be c
 
     # Hidden Attributes
 
-    # Attribute _ICAO:
-    # Invariant:
+    # Attribute _ICAO: the ICAO code for the user's airport
+    # Invariant: _ICAO is a string that is a valid ICAO airport code
 
-    # Attribute _IATA:
-    # Invariant:
+    # Attribute _IATA: the IATA code for the user's airport
+    # Invariant: _IATA is a string that is a valid IATA airport code
+
 
     # Getters/Setters GO HERE
     def getICAO(self):
@@ -67,14 +68,16 @@ class adURL(MainURL): # Inherits from MainURL class
 
     # Hidden Attributes
 
-    # Attribute _payload:
-    # Invariant:
+    # Attribute _payload: the information needed to submit a form to the FAA
+    # diagram system and retrieve the airport diagram
+    # Invariant: _payload is a dictionary that contains the correct information
+    # to make a POST request
 
     # Getters/Setters GO HERE
     def getPayload(self):
         """
-        Returns self._payload, a dictionary that contains infomration used when making a
-        POST request to the FAA website for airport diagrams
+        Returns self._payload, a dictionary that contains infomration used
+        when making a POST request to the FAA website for airport diagrams.
         """
         return self._payload
 
@@ -93,7 +96,8 @@ class adURL(MainURL): # Inherits from MainURL class
             #'ver': '2013',
             #'eff': '12-03-2020',
             #'end': '12-31-2020',
-            'diagrams': '1', # For future improvements, changing the diagram number changes the diagram given by the URL
+            'diagrams': '1', # For future improvements, changing the diagram
+            #number changes the diagram given by the URL
             'cycle': '2013',
         }
 
@@ -104,7 +108,8 @@ class adURL(MainURL): # Inherits from MainURL class
         retrieve the corresponding airport diagram from the FAA's website
         """
         temp = requests.session()
-        response = temp.post('https://www.faa.gov/air_traffic/flight_info/aeronav/digital_products/dtpp/search/results/', data=self.getPayload()) # SHORTEN !!!
+        response = temp.post('https://www.faa.gov/air_traffic/flight_info/aeronav/digital_products/dtpp/search/results/',
+        data=self.getPayload()) # SHORTEN !!!
         cleanResponse = response.text
 
         soup = BeautifulSoup(cleanResponse, 'lxml')
@@ -115,15 +120,15 @@ class adURL(MainURL): # Inherits from MainURL class
             p = str(link.get('href'))
             if p.find(self.getIATA()) > 0 and p.find('http://aeronav.faa.gov/') >= 0 and value:
                 result = p
-                print(result)
+        #        print(result)
                 value = False
 
-        final = requests.get(str(result)) # This accesses the PDF of the airport diagram
+        final = requests.get(str(result))
 
         fileName = str(self.getICAO()) + 'diagram.pdf'
 
-        #with open(fileName, 'wb') as f: # Uncomment if you want to download PDF
-        #    f.write(final.content)
+        with open(fileName, 'wb') as f:
+            f.write(final.content)
 
 
 class metarsURL(MainURL):
@@ -158,8 +163,3 @@ class metarsURL(MainURL):
 
         self.metarsText = result
         print(self.metarsText)
-
-
-class notamsURL(MainURL):
-
-    pass
