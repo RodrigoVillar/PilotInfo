@@ -1,15 +1,15 @@
 """
-NOTE: This project is a work in progress and it is likely that this file will
-not be main controller in future iterations.
+Note: Additions may be made to this project (e.g. adding a GUI interface).
+However, I am leaving the project as it is in order to learn more about
+the world of Python and its various frameworks.
 
-Pilot.py is (currently) in charge of starting the program, initializing the
-PilotInfo class, and handing control over to the control method. This class
-can access the PilotURL module.
+Pilot.py is the file in charge when it comes to PilotInfo. When run as
+a script, this file creates an instance of the PilotInfo class and
+eventually calls to PilotURL.py to get the information requried for
+this program.
 
-- Rod
+- Rod (01/11/2021)
 """
-
-# Remember to insert copyright info before uploading to Github
 
 import json
 import requests
@@ -23,35 +23,50 @@ class PilotInfo(object):
     this program will still retain higher authority over all other (possible)
     classes and subclasses.
 
-    Attribute ICAO:
-    Invariant:
+    Attribute ICAO: the ICAO code for the user's airport
+    Invariant: ICAO is a string that is a valid ICAO airport code
 
-    Attribute IATA:
-    Invariant:
+    Attribute IATA: the IATA code for the user's airport
+    Invariant: IATA is a string that is a valid ICAO airport code
     """
 
     # Hidden Attributes GO HERE
 
-    # Attribute _file:
-    # Invariant:
+    # Attribute _file: the JSON containing the necessary information to
+    # run this program
+    # Invariant: _file is an immutable dictionary containing airport
+    # information
 
-    # Attribute _adURL:
-    # Invariant:
+    # Attribute _adURL: the adURL object containing the PDF link of
+    # the airport diagram
+    # Invariant: _adURL is an immutable adURL object
+    
+    # Attribute _metarsURL: the metarsURL object containing the most
+    # recent metars for the airport
+    # Invariant: _metarsURL is an immutable metarsURL object
 
-    # Setters and Getters GO HERE
 
     # Explicit Methods and Initializer GO HERE
     def __init__(self, value):
         """
         Initializes the program and creates the necessary attributes needed
         for the class to operate as expected.
+        
+        Attribute value: value is the text that the user imports when
+        first running this program
+        
+        Precondition: value is a string and is also a valid ICAO airport
+        code
         """
+        assert type(value) == str, 'Precondition Violation'
+        assert value in self._file, 'Precondition Violation'
+        
         self._fileHelper()
 
         self.ICAO = value
         if self.ICAO in self._file:
-            self.IATA = self._file[self.ICAO]['iata'] # Getter probably needed here
-        #    print(self._file[self.ICAO])
+            self.IATA = self._file[self.ICAO]['iata'] 
+            #print(self._file[self.ICAO])
             self._adURL = adURL(self.ICAO, self.IATA)
             self._metarsURL = metarsURL(self.ICAO, self.IATA)
             self.control()
@@ -69,7 +84,6 @@ class PilotInfo(object):
             key = row
             value = self._file[self.ICAO][row]
             print(str(key) + ' : ' + str(value))
-        # My attempt to get the airport diagram
         self._adURL.adRetrieve()
         self._metarsURL.metarsRetrieve()
 
